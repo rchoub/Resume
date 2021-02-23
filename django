@@ -1,0 +1,269 @@
+## creatin virtual env with conda
+
+conda create --name myEnv django  -- > this will create a virtual env with name myEnv with latest version of django
+
+##activate v. env. 
+
+activate myEnv
+
+##deactivate v. env.
+
+deactivate myEnv
+
+##for viewing the env
+
+conda info --env
+
+
+##installing Django
+
+Conda install django 
+
+pip install django
+
+## go to the folder where you want to create your project
+
+cd My_Django
+
+
+##creating first project
+
+django-admin startproject project_name
+
+__init__.py
+This is a blank python script that due to its special name lets python know that this directory can be treated as a package.
+
+settings.py
+This is where you will store all your project settings
+
+urls.py
+This is a python script that will store all the URL patterns for your project. Basically the different pages of your web application.
+
+wsgi.py
+This is a python script that acts as  the web server gateway interface. it will later on help us deploy our web app to production
+
+manage.py
+This is a python script that we will use a lot. it will be associated with many commands as we build our web app
+
+##
+go to the project folder 
+
+and then run 
+
+##
+python manage.py runserver
+
+to check the installation of django
+
+in order to see your very first web page  being locally hosted on your computer
+
+Warning about migration that has to do with databases and how to connect them to django
+
+What is  a migration ?
+
+A migration allows you to move databases from one design to another this is also reversible.
+so you can migrate your database 
+
+## for creating a django application
+
+python manage.py startapp name_of_the_app
+
+__init__.py
+This is a blank python script that due to its special name lets python know that this directory can be treated as a package.
+
+admin.py
+you can register your models here which django will then use them with django's admin interface.
+
+apps.py
+here you can place application specific configurations
+
+models.py
+here you store the application's data models
+
+tests.py
+here you can store test functions to test your code
+
+views.py
+this is where you have functions that handle requests and return responses.
+
+Migrations folder
+This directory stores database specific information as it releases to the models
+
+## 
+add the application name you created inside the settings.py file inside INSTALLED_APPS list as a string
+
+###################creating db and adding data in it and creating admin page
+
+
+from django.db import models
+
+# Create your models here.
+class Topic(models.Model):
+    top_name = models.CharField(max_length=264,unique=True)
+
+    def __str__(self):
+        return self.top_name
+
+class Webpage(models.Model):
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    name = models.CharField(max_length=264,unique=True)
+    url = models.URLField(unique=True)
+
+
+# creating py file for populating data in your models
+import os
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE','ProTwo.settings')
+
+import django
+django.setup()
+
+from AppTwo.models import User
+from faker import Faker
+
+fakegen = Faker()
+
+def populate(N=5):
+    for entry in range(N):
+        fake_name = fakegen.name().split()
+        fake_first_name = fake_name[0]
+        fake_last_name = fake_name[1]
+        fake_email = fakegen.email()
+
+        user = User.objects.get_or_create(first_name=fake_first_name,
+        last_name=fake_last_name,
+        email=fake_email)[0]
+
+
+if __name__ == '__main__':
+    print("POPULATING DATABASES")
+    populate(20)
+    print("Complete!")
+
+##
+python manage.py migrate
+
+
+##
+python manage.py makemigrations first_app
+
+## for verification
+python manage.py shell
+
+from first_app.models import Topic
+>>> print(Topic.objects.all())
+<QuerySet []>
+>>> t = Topic(top_name="Social Network")
+>>> t.save()
+>>> print(Topic.objects.all())
+<QuerySet [<Topic: Social Network>]>
+
+then run the populate py file 
+
+# in admin.py
+
+from django.contrib import admin
+from first_app.models import AccessRecord,Topic,Webpage
+# Register your models here.
+
+admin.site.register(AccessRecord)
+admin.site.register(Topic)
+admin.site.register(Webpage)
+
+
+#creating super user
+
+(myDjangoEnv) C:\Users\ruchoube\Documents\My_Django\first_project>python manage.py createsuperuser
+Username (leave blank to use 'ruchoube'): Rushabh
+Email address: rushabh.choube@yahoo.com
+Password:
+Password (again):
+The password is too similar to the username.
+Bypass password validation and create user anyway? [y/N]: N
+Password:
+Password (again):
+Superuser created successfully.
+
+
+##################### form 
+in forms.py
+from django import forms
+
+class FormName(forms.Form):
+    name = forms.CharField()
+    email = forms.EmailField()
+    text = forms.CharField(widget=forms.Textarea)
+
+in views.py
+
+def form_name_view(request):
+    form = forms.FormName()
+
+    if request.method == 'POST':
+        form = forms.FormName(request.POST)
+        if form.is_valid():
+            print("VALIDATION SUCCESS")
+            print("NAME: "+form.cleaned_data['name'])
+            print("EMAIL: "+form.cleaned_data['email'])
+            print("TEXT: "+form.cleaned_data['text'])
+    return render(request,'third_app/forms_page.html',{'form':form})
+
+
+
+####form.html
+
+  <body>
+    <h1>Fill out the form</h1>
+    <div class="contianer">
+      <form method="POST">
+        {{form.as_p}}
+        {% csrf_token %}
+        <input type="submit" class="btn btn-primary" value="Submit">
+      </form>
+    </div>
+
+
+
+###############Field VALIDATION
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
